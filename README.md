@@ -1,2 +1,2 @@
 # 2024-mgr-sluzba-cywilna
-Repo do pracy mgr
+Wrzucam bez pliku z danymi. Jest on za duży na GitHuba (nawet po konwertowaniu na .zip).
