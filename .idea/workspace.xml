@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="eaf4e624-6388-40ad-947b-d307a8c052ea" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Code/Data cleansing.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Code/Data cleansing.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,12 +32,13 @@
     &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/KW/PycharmProjects/2024-mgr-sluzba-cywilna&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/KW/PycharmProjects/2024-mgr-sluzba-cywilna/Code&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -64,6 +64,11 @@
       <workItem from="1711740468155" duration="3347000" />
       <workItem from="1711794362403" duration="2031000" />
       <workItem from="1711834614260" duration="3816000" />
+      <workItem from="1711838518922" duration="386000" />
+      <workItem from="1711838939901" duration="409000" />
+      <workItem from="1711839376313" duration="66000" />
+      <workItem from="1711893059613" duration="614000" />
+      <workItem from="1711907707757" duration="478000" />
     </task>
     <servers />
   </component>
