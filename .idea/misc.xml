@@ -4,7 +4,4 @@
     <option name="sdkName" value="civil-service" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="civil-service" project-jdk-type="Python SDK" />
-  <component name="PyCharmDSProjectLayout">
-    <option name="id" value="JupyterRightHiddenStructureLayout" />
-  </component>
 </project>
