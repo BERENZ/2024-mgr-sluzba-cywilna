@@ -5,6 +5,7 @@ path = os.getcwd() + "\\Cleansed_data\\kprm-20231115.csv\\kprm-20231115.csv"
 new_df = pd.read_csv(path, sep=";")
 # Correcting a typo.
 new_df.rename(columns={"date_annouced": "date_announced"}, inplace=True)
+new_df.head(100)
 
 
 # Converting required level of educations to hierarchical categorical variables:
@@ -115,3 +116,5 @@ cleansed_df = new_df[new_df.index.isin(list(new_df_success.index)+list(rest_new_
 # Assigning 1 for ads that led to employment, and 0 where there was no success.
 cleansed_df.loc[list(new_df_success.index), 'result1'] = 1
 cleansed_df.loc[list(result2_new_df_failure.index)+list(rest_new_df_failure.index), 'result1'] = 0
+
+cleansed_df.to_csv('cleaned_data.csv', index=False)
