@@ -1,12 +1,10 @@
 import pandas as pd
 import os
 
-path = os.getcwd() + "\\Cleansed_data\\kprm-20231115.csv\\kprm-20231115.csv"
+path = os.getcwd()[0:-11] + "\\Cleansed_data\\Pre-processed_1\\kprm-20231115.csv\\kprm-20231115.csv"
 new_df = pd.read_csv(path, sep=";")
 # Correcting a typo.
 new_df.rename(columns={"date_annouced": "date_announced"}, inplace=True)
-new_df.head(100)
-
 
 # Converting required level of educations to hierarchical categorical variables:
 # 1 - high school education
@@ -116,5 +114,55 @@ cleansed_df = new_df[new_df.index.isin(list(new_df_success.index)+list(rest_new_
 # Assigning 1 for ads that led to employment, and 0 where there was no success.
 cleansed_df.loc[list(new_df_success.index), 'result1'] = 1
 cleansed_df.loc[list(result2_new_df_failure.index)+list(rest_new_df_failure.index), 'result1'] = 0
+
+# ASSIGNING POSITION LEVEL CATEGORIES
+
+# Splitting job positions into categories, just like it's been done with 'failure' and 'success'.
+assistent_df = cleansed_df[cleansed_df['job_title'].str.contains(r'asystent|pomocnik')][['job_title']]
+junior_df = cleansed_df[cleansed_df['job_title'].str.contains(r'młodszy|mlodszy')][['job_title']]
+senior_df = cleansed_df[cleansed_df['job_title'].str.contains(r'starszy')][['job_title']]
+director_df = cleansed_df[cleansed_df['job_title'].str.contains(r'dyrektor|kierownik|kapitan|naczelnik')][['job_title']]
+# 'Główny' is translated as 'head' or 'main'.
+head_df = cleansed_df[cleansed_df['job_title'].str.contains(r'główny|glowny')][['job_title']]
+
+# Separating "specjalista" and "ekspert" from "młodszy/starszy specjalista/ekspert",
+# so that there are no duplicates with junior_df and senior_df.
+expert_df = (
+    cleansed_df[
+        (cleansed_df['job_title'].str.contains(r'ekspert|specjalista') == True) &
+        (cleansed_df['job_title'].str.contains(r'młodszy|mlodszy|starszy') == False)]
+    [['job_title']]
+)
+# Doing the same separation for 'inspector'.
+inspector_df = (
+    cleansed_df[
+        (cleansed_df['job_title'].str.contains(r'inspektor') == True) &
+        (cleansed_df['job_title'].str.contains(r'młodszy|mlodszy|starszy') == False)]
+    [['job_title']]
+)
+
+
+# Categorizing ads that ended up without an assignment to the previous categories
+# (regular positions, between junior and senior).
+position_categories_indexes = (
+        list(junior_df.index) + list(senior_df.index) + list(director_df.index) + list(expert_df.index) +
+        list(assistent_df.index) + list(head_df.index) + list(inspector_df.index)
+)
+mid_df = cleansed_df[~cleansed_df.index.isin(position_categories_indexes)]
+
+# Assigning cleansed categories to a new column - specific categories might turn out useful later on,
+# so I don't want to dispose of this information.
+
+# Creating a new column by copying the existing one.
+cleansed_df["job_position_category"] = cleansed_df["job_title"]
+# Changing the values of the column so that it represents job level categories.
+cleansed_df.loc[list(junior_df.index), 'job_position_category'] = 'junior'
+cleansed_df.loc[list(senior_df.index), 'job_position_category'] = 'senior'
+cleansed_df.loc[list(assistent_df.index), 'job_position_category'] = 'assistent'
+cleansed_df.loc[list(head_df.index), 'job_position_category'] = 'head/main'
+cleansed_df.loc[list(director_df.index), 'job_position_category'] = 'director/manager'
+cleansed_df.loc[list(expert_df.index), 'job_position_category'] = 'expert'
+cleansed_df.loc[list(inspector_df.index), 'job_position_category'] = 'inspector'
+cleansed_df.loc[list(mid_df.index), 'job_position_category'] = 'mid'
 
 cleansed_df.to_csv('cleaned_data.csv', index=False)
