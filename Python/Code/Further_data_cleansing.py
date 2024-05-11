@@ -118,35 +118,27 @@ cleansed_df.loc[list(result2_new_df_failure.index)+list(rest_new_df_failure.inde
 # ASSIGNING POSITION LEVEL CATEGORIES
 
 # Splitting job positions into categories, just like it's been done with 'failure' and 'success'.
-assistent_df = cleansed_df[cleansed_df['job_title'].str.contains(r'asystent|pomocnik')][['job_title']]
-junior_df = cleansed_df[cleansed_df['job_title'].str.contains(r'młodszy|mlodszy')][['job_title']]
-senior_df = cleansed_df[cleansed_df['job_title'].str.contains(r'starszy')][['job_title']]
-director_df = cleansed_df[cleansed_df['job_title'].str.contains(r'dyrektor|kierownik|kapitan|naczelnik')][['job_title']]
+assistent_df = cleansed_df[cleansed_df['job_title'].str.contains(r'asystent|pomocnik', case=False)][['job_title']]
+junior_df = cleansed_df[cleansed_df['job_title'].str.contains(r'młodszy|mlodszy', case=False)][['job_title']]
+senior_df = cleansed_df[cleansed_df['job_title'].str.contains(r'starszy', case=False)][['job_title']]
+director_df = cleansed_df[cleansed_df['job_title'].str.contains(r'dyrektor|kierownik|kapitan|naczelnik', case=False)][['job_title']]
 # 'Główny' is translated as 'head' or 'main'.
-head_df = cleansed_df[cleansed_df['job_title'].str.contains(r'główny|glowny')][['job_title']]
+head_df = cleansed_df[cleansed_df['job_title'].str.contains(r'główny|glowny', case=False)][['job_title']]
 
 # Separating "specjalista" and "ekspert" from "młodszy/starszy specjalista/ekspert",
 # so that there are no duplicates with junior_df and senior_df.
 expert_df = (
     cleansed_df[
-        (cleansed_df['job_title'].str.contains(r'ekspert|specjalista') == True) &
-        (cleansed_df['job_title'].str.contains(r'młodszy|mlodszy|starszy') == False)]
+        (cleansed_df['job_title'].str.contains(r'ekspert|specjalista', case=False) == True) &
+        (cleansed_df['job_title'].str.contains(r'młodszy|mlodszy|starszy', case=False) == False)]
     [['job_title']]
 )
-# Doing the same separation for 'inspector'.
-inspector_df = (
-    cleansed_df[
-        (cleansed_df['job_title'].str.contains(r'inspektor') == True) &
-        (cleansed_df['job_title'].str.contains(r'młodszy|mlodszy|starszy') == False)]
-    [['job_title']]
-)
-
 
 # Categorizing ads that ended up without an assignment to the previous categories
 # (regular positions, between junior and senior).
 position_categories_indexes = (
         list(junior_df.index) + list(senior_df.index) + list(director_df.index) + list(expert_df.index) +
-        list(assistent_df.index) + list(head_df.index) + list(inspector_df.index)
+        list(assistent_df.index) + list(head_df.index)
 )
 mid_df = cleansed_df[~cleansed_df.index.isin(position_categories_indexes)]
 
@@ -162,7 +154,179 @@ cleansed_df.loc[list(assistent_df.index), 'job_position_category'] = 'assistent'
 cleansed_df.loc[list(head_df.index), 'job_position_category'] = 'head/main'
 cleansed_df.loc[list(director_df.index), 'job_position_category'] = 'director/manager'
 cleansed_df.loc[list(expert_df.index), 'job_position_category'] = 'expert'
-cleansed_df.loc[list(inspector_df.index), 'job_position_category'] = 'inspector'
 cleansed_df.loc[list(mid_df.index), 'job_position_category'] = 'mid'
 
-cleansed_df.to_csv('cleaned_data.csv', index=False)
+
+# DETERMINING THE FIELD OF THE JOB
+
+vet_df = (
+    cleansed_df[
+        cleansed_df['job_title'].str.contains('weteryn.+', regex=True, case=False)
+    ]
+[['job_title']]
+)
+IT_n_maths_df = (
+    cleansed_df[
+        cleansed_df['job_title'].str.contains('.nformaty.+|IT|program.+|statyst.+|matemat.+|anali.+', regex=True, case=True)
+    ]
+    [['job_title']]
+)
+# Note: 'veterinary inspector' or 'pharmacy inspector' are categorized as 'vet' and 'pharmacy/chemistry', respectively.
+law_df = (
+    cleansed_df[
+        (cleansed_df['job_title'].str.contains(
+            'radca|prawnik|kontroler|skarb.+|prawny|wizytator|aplikant|oskarżyciel|aplikant|referendarz|podreferendarz|księgow.+|inspektor',
+            regex=True, case=False)==True) &
+        (cleansed_df['job_title'].str.contains('weteryn.+|farmac.+|aptek.+|lecznic.+|laborator.+', regex=True, case=False)==False)
+    ]
+    [['job_title']]
+)
+pharmacy_n_chemistry_df = (
+    cleansed_df[
+        cleansed_df['job_title'].str.contains('farmac.+|aptek.+|lecznic.+|laborator.+', regex=True, case=False)
+    ]
+    [['job_title']]
+)
+# Bossman, captain, port, etc.
+water_df = (
+    cleansed_df[
+        cleansed_df['job_title'].str.contains('bossman.+|kapitan|bosman.+|port|wybrzeż.+', regex=True, case=False)
+    ]
+    [['job_title']]
+)
+tech_n_construction_df = (
+    cleansed_df[
+        cleansed_df['job_title'].str.contains('technik|techniczny|górni.+|budowl.+', regex=True, case=False)
+    ]
+    [['job_title']]
+)
+documents_df = (
+    cleansed_df[
+        (cleansed_df['job_title'].str.contains('referent|legalizator|archiwista', case=False)==True) &
+        (cleansed_df['job_title'].str.contains('.nformaty.+|IT|program.+|statyst.+|matemat.+|anali.+', regex=True, case=False)==False)
+    ]
+    [['job_title']]
+)
+# Manager-like job positions that haven't been categorized in any of the previous fields.
+manager_df = (
+    cleansed_df[
+        (cleansed_df['job_title'].str.contains(r'kierownik|dyrektor|naczelnik.+', regex=True, case=False)==True) &
+        (cleansed_df['job_title'].str.contains('weteryn.+|informat.+|port.+|techni.+|górni.+|budowl.+', regex=True, case=False)==False)
+    ]
+    [['job_title']]
+)
+
+
+# Indices of all obtained matches from the above criteria stored in one list.
+job_field_indexes = (
+        list(documents_df.index) + list(tech_n_construction_df.index) + list(water_df.index) + list(pharmacy_n_chemistry_df.index) +
+        list(manager_df.index) + list(law_df.index) + list(IT_n_maths_df.index) + list(vet_df.index)
+)
+
+# Fields that haven't been categorized by the above criteria.
+left_job_fields_df = cleansed_df[~cleansed_df.index.isin(job_field_indexes)]
+
+
+# Most of the fields can be categorized simply by the 'job_title' column, however,
+# without including the department name in the 'work_place2' or 'institution' columns,
+# around 30% of ads are left without a specific category.
+
+# Browsing through ads that haven't been categorized, to avoid double categorization.
+environment_protection_df = (
+    left_job_fields_df[
+        (cleansed_df['institution'].str.contains('środowisk.+|leśn.+|las.+|roślin.+|nasiennictwa', regex=True, case=False))|
+        (cleansed_df['work_place2'].str.contains('środowisk.+|leśn.+|las.+|roślin.+|nasiennictwa', regex=True, case=False))
+    ]
+)
+# Working for the following entities: police, firefighters, military, border guards.
+uniformed_services_df = (
+    left_job_fields_df[
+        (cleansed_df['institution'].str.contains('polic.+|straż.+|wojsk.+|żołnier.+', regex=True, case=False))|
+        (cleansed_df['work_place2'].str.contains('polic.+|straż.+|wojsk.+|żołnier.+', regex=True, case=False))
+    ]
+)
+uncategorized_med_df = (
+    left_job_fields_df[
+        (cleansed_df['institution'].str.contains('med.+|farmaceu.+|chemi.+|sanitar.+', regex=True, case=False))|
+        (cleansed_df['work_place2'].str.contains('med.+|farmaceu.+|chemi.+|sanitar.+', regex=True, case=False))
+    ]
+)
+uncategorized_tech_n_construction_df = (
+    left_job_fields_df[
+        (cleansed_df['institution'].str.contains('budowl.+|górni.+|techn.+|drog.+|dróg|autostrad.+|infrastruk.+', regex=True, case=False))|
+        (cleansed_df['work_place2'].str.contains('budowl.+|górni.+|techn.+|drog.+|dróg|autostrad.+|infrastruk.+', regex=True, case=False))
+    ]
+)
+uncategorized_IT_n_statistics_df = (
+    left_job_fields_df[
+        (cleansed_df['institution'].str.contains('informat.+|architektury danych|statyst.+|analiz.+', regex=True, case=False)==True)|
+        (cleansed_df['work_place2'].str.contains('informat.+|architektury danych|statyst.+|analiz.+', regex=True, case=False)==True)&
+        (cleansed_df['work_place2'].str.contains('teleinfromatyk.+', regex=True, case=False)==False)
+        # ^some jobs at the ICT department are not associated with IT at all.
+    ]
+)
+uncategorized_law_df = (
+    left_job_fields_df[
+        (cleansed_df['institution'].str.contains('prawn.+|księgow.+', regex=True, case=False))|
+        (cleansed_df['work_place2'].str.contains('prawn.+|księgow.+', regex=True, case=False))
+    ]
+)
+uncategorized_water_df = (
+    left_job_fields_df[
+        (cleansed_df['institution'].str.contains('morsk.+', regex=True, case=False))|
+        (cleansed_df['work_place2'].str.contains('morsk.+', regex=True, case=False))
+    ]
+)
+uncategorized_vet_df = (
+    left_job_fields_df[
+        (cleansed_df['institution'].str.contains('weteryn.+', regex=True, case=False))|
+        (cleansed_df['work_place2'].str.contains('weteryn.+', regex=True, case=False))
+    ]
+)
+
+# Indices of ads that are still left without a category.
+# They are going to have 'other' category assigned.
+newly_categorized_ads = (
+    list(uncategorized_law_df.index) + list(uncategorized_IT_n_statistics_df.index) + list(uncategorized_tech_n_construction_df.index) + list(uncategorized_med_df.index) +
+    list(uniformed_services_df.index) + list(uncategorized_law_df.index) + list(environment_protection_df.index) + list(uncategorized_water_df) + list(uncategorized_vet_df.index)
+)
+other_job_fields_df = left_job_fields_df[~left_job_fields_df.index.isin(newly_categorized_ads)]
+
+# Again, it is undesired to drop the job_title column, so I'm creating a new one.
+cleansed_df["job_field"] = cleansed_df["job_title"]
+cleansed_df.loc[list(documents_df.index), 'job_field'] = 'documents'
+cleansed_df.loc[list(tech_n_construction_df.index), 'job_field'] = 'tech/construction'
+cleansed_df.loc[list(uncategorized_tech_n_construction_df.index), 'job_field'] = 'tech/construction'
+cleansed_df.loc[list(water_df.index), 'job_field'] = 'water'
+cleansed_df.loc[list(uncategorized_water_df.index), 'job_field'] = 'water'
+cleansed_df.loc[list(pharmacy_n_chemistry_df.index), 'job_field'] = 'pharmacy/chemistry'
+cleansed_df.loc[list(uncategorized_med_df.index), 'job_field'] = 'pharmacy/chemistry'
+cleansed_df.loc[list(manager_df.index), 'job_field'] = 'other_manager'
+cleansed_df.loc[list(law_df.index), 'job_field'] = 'law'
+cleansed_df.loc[list(uncategorized_law_df.index), 'job_field'] = 'law'
+cleansed_df.loc[list(IT_n_maths_df.index), 'job_field'] = 'IT/statistics'
+cleansed_df.loc[list(uncategorized_IT_n_statistics_df.index), 'job_field'] = 'IT/statistics'
+cleansed_df.loc[list(vet_df.index), 'job_field'] = 'vet'
+cleansed_df.loc[list(uncategorized_vet_df.index), 'job_field'] = 'vet'
+cleansed_df.loc[list(environment_protection_df.index), 'job_field'] = 'environment'
+cleansed_df.loc[list(uniformed_services_df.index), 'job_field'] = 'uniformed services'
+cleansed_df.loc[list(other_job_fields_df.index), 'job_field'] = 'other'
+
+
+# FORMATTING
+# Dropping unnecessary columns.
+cleansed_df.drop(columns=['result2', 'date_documents', 'date_result', 'date_valid'], inplace=True)
+
+# Reindexing and renaming columns so that the order is more intuitive.
+cleansed_df = cleansed_df.reindex(columns=['job_id', 'result1', 'job_field', 'job_position_category', 'job_title', 'education', 'work_time', 'vacancies', 'salary', 'city', 'institution', 'work_place1', 'work_place2', 'address', 'responsibilities', 'requirements1', 'requirements2', 'date_announced', 'views'])
+
+cleansed_df.rename({
+    'job_id': 'ad_id', 'result1': 'result', 'job_field': 'job_field', 'job_position_category': 'position_category',
+    'job_title': 'position', 'education': 'education_level', 'work_time': 'work_time', 'vacancies': 'vacancies',
+    'salary': 'salary', 'city': 'city', 'institution': 'institution', 'address': 'institution_address',
+    'work_place1': 'workplace', 'work_place2': 'department', 'responsibilities': 'responsibilities',
+    'requirements1': 'requirements', 'requirements2': 'nice_to_have', 'date_announced': 'date_announced', 'views': 'views'
+}, axis='columns', inplace=True)
+
+path = os.getcwd()[0:-11] + 'Cleansed_data\\Cleaned_2\\'
+cleansed_df.to_csv(path + 'cleaned_data.csv', index=False)
