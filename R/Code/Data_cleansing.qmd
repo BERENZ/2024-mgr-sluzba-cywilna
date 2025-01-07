@@ -1,0 +1,62 @@
+---
+title: "Civil_service"
+---
+
+```{r}
+library(RcppSimdJson)
+library(data.table)
+library(stringi) ## stringr
+library(lubridate)
+
+file <- 
+  "C:\\Users\\KW\\PycharmProjects\\2024-mgr-sluzba-cywilna\\Raw_data\\kprm-with-salary-update-20231115.json"
+
+lines <- readLines(file)
+```
+
+```{r}
+lines |> 
+  lapply(fparse) |>
+  lapply(function(l) lapply(l, function(x) trimws(paste(x, collapse = "|-|")))) |>
+  lapply(unlist) |>
+  do.call("rbind", args = _) |>
+  data.frame() |>
+  setNames(c("job_id", "job_title", "institution", "city",
+             "address", "work_place1", "work_place2", "work_place2", 
+             "date_annouced", "date_result", "date_valid",
+             "result", "salary", "vacancies", "work_time", "remove", "responsibilities",
+             "education", "requirements1", "requirements2", "additional_corresp", "views")) |>
+  setDT() -> lines_df
+```
+
+```{r}
+lines_df[, work_place2:=NULL]
+lines_df[, remove:=NULL]
+
+lines_df[, job_id:= stri_extract_first_regex(job_id, "\\d{1,}")] ## usuwam NR z id
+lines_df[, views:= as.numeric(stri_extract_first_regex(views, "\\d{1,}"))] ## 
+lines_df[, address:=stri_trim_both(stri_replace_first_fixed(address, "Adres urzędu:", ""))]
+lines_df[, work_place1:=stri_trim_both(stri_replace_first_fixed(work_place1, "Miejsce wykonywania pracy:", ""))]
+lines_df[, result:=stri_trim_both(stri_replace_first_fixed(result, "Wyniki naboru:", ""))]
+lines_df[, education:=stri_trim_both(stri_replace_first_fixed(education, "Wykształcenie:", ""))]
+
+lines_df[, date_annouced:=dmy(date_annouced)]
+lines_df[, date_result:=as.Date(stri_datetime_parse(date_result, "date_long", locale='pl_PL'))]
+lines_df[, date_valid:=as.Date(stri_datetime_parse(date_valid, "date_long", locale='pl_PL'))]
+lines_df[, date_documents:=dmy(stri_extract_first_regex(additional_corresp, "\\d{2}\\.\\d{2}\\.\\d{4}"))]
+
+lines_df[, vacancies:=as.numeric(vacancies)]
+
+lines_df[stri_detect_regex(result, "^anulowano nabór"), result:= stri_replace_first_fixed(result, "anulowano nabór", replacement = "anulowano nabór|")]
+lines_df[stri_detect_regex(result, "^anulowano nabór"), result := stri_replace_last_fixed(result, "|", "")]
+lines_df[!stri_detect_regex(result, "^anulowano nabór") & !stri_detect_fixed(result, "|"), result := stri_replace_first_fixed(result, "kandydata", "kandydata|")]
+lines_df[, c("result1", "result2") := tstrsplit(result, "|", fixed = T)]
+
+fwrite(
+  x = lines_df[, .(job_id, job_title, institution, city, address, work_place1, work_place2, 
+                   date_annouced, date_result, date_valid, date_documents, result1, result2, 
+                   salary, vacancies, work_time, responsibilities, education, requirements1, requirements2, views)],
+  quote = TRUE,
+  sep = ";",
+  file = "../data/kprm-20231115.csv.gz")
+```
