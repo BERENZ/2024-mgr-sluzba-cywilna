@@ -9,7 +9,7 @@ notebooks_to_run = [
     'kprm_data_merge_1.ipynb',
     'teryt.ipynb',
     'main_and_kprm_data_merge_2.ipynb',
-    'maps.ipynb',
+    #'maps.ipynb', maps excluded since they require user input
     'bdl_merge.ipynb',
     'feature_engineering.ipynb'
 ]
