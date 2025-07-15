@@ -13,8 +13,7 @@ Strucutre of the repository:
 1. Initial data cleansing: loading the data downloaded from the KPRM website and its initial
 processing (Author: Konrad Wasiak).
 2. Further data cleansing: the bulk of the data cleansing process is done in this notebook.
-data cleansing. It also follows the categorization of data and isolation of succ-
-ces and failures (Author: Konrad Wasiak).
+data cleansing. It also follows the categorization of data and isolation of succes and failures (Author: Konrad Wasiak).
 3. KPRM data merge: merging the data sent to us by the KPRM into a single source (Author:
 Manuela Walczak).
 4. TERYT: obtaining county and province codes from the BDL for existing data
