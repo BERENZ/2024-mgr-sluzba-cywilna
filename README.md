@@ -1,10 +1,12 @@
 # 2024-mgr-sluzba-cywilna
 The project was a part of the authors' (Konrad Wasiak, Manuela Walczak) masters' thesis. The final goal was to dwell into results of the recruitment process in Polish civil service and explain, why some entities are able to staff more vacancies.
 The answers to these question, alongside other key findings, are introduced in the paper.
+<p>
 One other crucial outcome of our work was creating the dataset for future research that can be found here:
 https://doi.org/10.18150/Q23MGT
 
 The dataset contains cleansed and merged data from: KPRM's website with job offers (web-scraped by Marcin Kostka), regional data from Polish districts taken from Bank Danych Lokalnych, and data describing individual institutions, which has been sent to us by KPRM.
+</p>
 Keywords: explainable AI, civil service, vacancies, civil service, Poland, statistics, DALEX
 
 Strucutre of the repository:
